@@ -358,17 +358,95 @@ body {
 }
 
 /* ═══════════════════════════════════════════════
+   AMBIENT BACKGROUND
+   ═══════════════════════════════════════════════ */
+.ambient-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--bg);
+  pointer-events: none;
+}
+
+.mesh-blob {
+  position: absolute;
+  filter: blur(80px);
+  opacity: 0.6;
+  animation: meshFloat 20s ease-in-out infinite alternate;
+  border-radius: 50%;
+}
+
+.blob-1 {
+  width: 60vw;
+  height: 60vw;
+  background: #3b2046;
+  top: -10%;
+  left: -10%;
+  animation-delay: 0s;
+}
+
+.blob-2 {
+  width: 50vw;
+  height: 50vw;
+  background: #142a42;
+  bottom: -20%;
+  right: -10%;
+  animation-delay: -5s;
+}
+
+.blob-3 {
+  width: 40vw;
+  height: 40vw;
+  background: #46202b;
+  top: 40%;
+  left: 40%;
+  animation-delay: -10s;
+}
+
+@keyframes meshFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(10vw, 5vh) scale(1.2); }
+  100% { transform: translate(-5vw, 15vh) scale(0.9); }
+}
+
+.mesh-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
+
+/* ═══════════════════════════════════════════════
    PLAYER SCREEN
    ═══════════════════════════════════════════════ */
 .player-wrapper {
   width: 100%;
-  max-width: 480px;
+  max-width: 1200px;
   height: 100dvh;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   padding: 20px 24px env(safe-area-inset-bottom, 20px);
   position: relative;
   z-index: 2;
+}
+
+.player-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .player-layout {
+    flex-direction: row;
+    align-items: center;
+    gap: 64px;
+  }
 }
 
 /* Top bar */
@@ -421,21 +499,36 @@ body {
    ═══════════════════════════════════════════════ */
 .track-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 12px 0;
+  gap: 24px;
   flex-shrink: 0;
 }
 
+@media (min-width: 768px) {
+  .track-header {
+    flex: 1;
+    max-width: 45%;
+    align-items: flex-start;
+  }
+}
+
 .album-art-player {
-  width: 56px;
-  height: 56px;
+  width: min(80vw, 400px);
+  height: min(80vw, 400px);
   flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: 16px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5),
-              0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+              0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: transform 0.5s var(--ease-out-expo);
+}
+
+.paused .album-art-player {
+  transform: scale(0.95);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4),
+              0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .album-img-player {
@@ -443,39 +536,43 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
-  animation: vinylSpin 12s linear infinite;
-  animation-play-state: running;
-}
-
-.paused .album-img-player {
-  animation-play-state: paused;
-}
-
-@keyframes vinylSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 /* Track info */
 .track-info {
-  text-align: left;
+  text-align: center;
   flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .track-info {
+    text-align: left;
+  }
 }
 
 .track-title {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.2;
 }
 
 .track-artist {
-  font-size: 0.75rem;
+  font-size: clamp(0.8rem, 2vw, 1rem);
   font-weight: 400;
   color: var(--fg-muted);
-  margin-top: 2px;
-  letter-spacing: 0.03em;
+  margin-top: 4px;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.lyrics-and-controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
 }
 
 /* ═══════════════════════════════════════════════
@@ -503,7 +600,7 @@ body {
 }
 
 .lyrics-container {
-  padding: 30vh 0 50vh;
+  padding: 40vh 0;
   transition: transform 0.6s var(--ease-out-quint);
 }
 
@@ -511,32 +608,44 @@ body {
   text-align: center;
   padding: 10px 16px;
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
   font-weight: 400;
   line-height: 1.5;
   color: var(--fg-dim);
+  filter: blur(3px);
+  transform: scale(0.95);
   transition: color 0.5s var(--ease-out-expo),
               transform 0.5s var(--ease-out-expo),
               opacity 0.5s var(--ease-out-expo),
+              filter 0.5s var(--ease-out-expo),
               font-size 0.5s var(--ease-out-expo);
   cursor: pointer;
   user-select: none;
   position: relative;
 }
 
+@media (min-width: 768px) {
+  .lyric-line {
+    text-align: left;
+  }
+}
+
 .lyric-line:hover {
   color: var(--fg-muted);
+  filter: blur(1px);
 }
 
 .lyric-line.active {
   color: var(--fg);
-  transform: scale(1.08);
+  transform: scale(1.05);
   font-weight: 700;
+  filter: blur(0);
   text-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
 }
 
 .lyric-line.past {
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.1);
+  filter: blur(5px);
 }
 
 .lyric-line.instrumental {
@@ -560,6 +669,21 @@ body {
   font-size: 3.2rem;
   color: var(--fg);
   text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+/* ═══════════════════════════════════════════════
+   CONTROLS DOCK
+   ═══════════════════════════════════════════════ */
+.controls-dock {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 24px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  margin-top: 16px;
+  flex-shrink: 0;
 }
 
 /* ═══════════════════════════════════════════════

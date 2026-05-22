@@ -33,8 +33,13 @@
 </head>
 <body>
 
-  <!-- Starfield Canvas -->
-  <canvas id="starfield"></canvas>
+  <!-- Ambient Mesh Background -->
+  <div class="ambient-background">
+    <div class="mesh-blob blob-1"></div>
+    <div class="mesh-blob blob-2"></div>
+    <div class="mesh-blob blob-3"></div>
+    <div class="mesh-overlay"></div>
+  </div>
 
   <!-- ═══════════════ INTRO SCREEN ═══════════════ -->
   <section id="intro-screen" class="screen active">
@@ -87,57 +92,65 @@
         <span class="now-playing-text">Now Playing</span>
       </div>
 
-      <!-- Album Art + Track Info -->
-      <div class="track-header">
-        <div class="album-art-player">
-          <img src="album-art.jpg" alt="Album Art" class="album-img-player" id="album-img-player">
+      <div class="player-layout">
+        <!-- Left Column: Album Art -->
+        <div class="track-header">
+          <div class="album-art-player">
+            <img src="album-art.jpg" alt="Album Art" class="album-img-player" id="album-img-player">
+          </div>
+          <div class="track-info">
+            <h1 class="track-title">Beneath the Chennai Sky</h1>
+            <p class="track-artist">RIKA AND SRIHARI</p>
+          </div>
         </div>
-        <div class="track-info">
-          <h1 class="track-title">Beneath the Chennai Sky</h1>
-          <p class="track-artist">RIKA AND SRIHARI</p>
-        </div>
-      </div>
 
-      <!-- Lyrics Container -->
-      <div id="lyrics-viewport" class="lyrics-viewport">
-        <div id="lyrics-container" class="lyrics-container">
-          <!-- Lyrics injected by JS -->
-        </div>
-      </div>
+        <!-- Right Column: Lyrics & Controls -->
+        <div class="lyrics-and-controls">
+          <!-- Lyrics Container -->
+          <div id="lyrics-viewport" class="lyrics-viewport">
+            <div id="lyrics-container" class="lyrics-container">
+              <!-- Lyrics injected by JS -->
+            </div>
+          </div>
 
-      <!-- Progress Bar -->
-      <div class="progress-wrapper" id="progress-wrapper">
-        <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill"></div>
-          <div class="progress-thumb" id="progress-thumb"></div>
-        </div>
-        <div class="time-display">
-          <span id="current-time">0:00</span>
-          <span id="total-time">0:00</span>
-        </div>
-      </div>
+          <!-- Player Controls Dock -->
+          <div class="controls-dock">
+            <!-- Progress Bar -->
+            <div class="progress-wrapper" id="progress-wrapper">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+                <div class="progress-thumb" id="progress-thumb"></div>
+              </div>
+              <div class="time-display">
+                <span id="current-time">0:00</span>
+                <span id="total-time">0:00</span>
+              </div>
+            </div>
 
-      <!-- Controls -->
-      <div class="controls">
-        <button id="prev-btn" class="control-btn secondary" aria-label="Previous">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
-          </svg>
-        </button>
-        <button id="play-pause-btn" class="control-btn primary" aria-label="Play/Pause">
-          <svg class="icon-play" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 3 19 12 5 21 5 3"/>
-          </svg>
-          <svg class="icon-pause" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
-            <rect x="6" y="4" width="4" height="16"/>
-            <rect x="14" y="4" width="4" height="16"/>
-          </svg>
-        </button>
-        <button id="next-btn" class="control-btn secondary" aria-label="Next">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
-          </svg>
-        </button>
+            <!-- Controls -->
+            <div class="controls">
+              <button id="prev-btn" class="control-btn secondary" aria-label="Previous">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                </svg>
+              </button>
+              <button id="play-pause-btn" class="control-btn primary" aria-label="Play/Pause">
+                <svg class="icon-play" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                <svg class="icon-pause" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+                  <rect x="6" y="4" width="4" height="16"/>
+                  <rect x="14" y="4" width="4" height="16"/>
+                </svg>
+              </button>
+              <button id="next-btn" class="control-btn secondary" aria-label="Next">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
