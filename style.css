@@ -443,17 +443,6 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
-  animation: vinylSpin 12s linear infinite;
-  animation-play-state: running;
-}
-
-.paused .album-img-player {
-  animation-play-state: paused;
-}
-
-@keyframes vinylSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 /* Track info */
