@@ -67,81 +67,12 @@ const lyricsContainer  = document.getElementById('lyrics-container');
 const lyricsViewport   = document.getElementById('lyrics-viewport');
 const iconPlay         = document.querySelector('.icon-play');
 const iconPause        = document.querySelector('.icon-pause');
-const canvas           = document.getElementById('starfield');
 
 // ─── State ───
 let currentLineIndex = -1;
 let isPlaying = false;
 let lyricElements = [];
 
-// ═══════════════════════════════════════════════
-// STARFIELD BACKGROUND
-// ═══════════════════════════════════════════════
-function initStarfield() {
-  const ctx = canvas.getContext('2d');
-  let stars = [];
-  const STAR_COUNT = 120;
-
-  function resize() {
-    canvas.width = window.innerWidth * devicePixelRatio;
-    canvas.height = window.innerHeight * devicePixelRatio;
-    canvas.style.width = window.innerWidth + 'px';
-    canvas.style.height = window.innerHeight + 'px';
-    ctx.scale(devicePixelRatio, devicePixelRatio);
-    initStars();
-  }
-
-  function initStars() {
-    stars = [];
-    for (let i = 0; i < STAR_COUNT; i++) {
-      stars.push({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        r: Math.random() * 1.2 + 0.3,
-        alpha: Math.random() * 0.6 + 0.1,
-        speed: Math.random() * 0.0008 + 0.0002,
-        phase: Math.random() * Math.PI * 2
-      });
-    }
-  }
-
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
-  window.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-  });
-
-  function draw(time) {
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    
-    const offsetX = (mouseX - window.innerWidth / 2) * 0.05;
-    const offsetY = (mouseY - window.innerHeight / 2) * 0.05;
-
-    for (const star of stars) {
-      const flicker = Math.sin(time * star.speed + star.phase) * 0.3 + 0.7;
-      
-      let x = star.x - offsetX * star.speed * 1000;
-      let y = star.y - offsetY * star.speed * 1000;
-
-      // Wrap
-      if (x < 0) x += window.innerWidth;
-      if (x > window.innerWidth) x -= window.innerWidth;
-      if (y < 0) y += window.innerHeight;
-      if (y > window.innerHeight) y -= window.innerHeight;
-
-      ctx.beginPath();
-      ctx.arc(x, y, star.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha * flicker})`;
-      ctx.fill();
-    }
-    requestAnimationFrame(draw);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  requestAnimationFrame(draw);
-}
 
 // ═══════════════════════════════════════════════
 // INTRO ANIMATIONS
@@ -384,7 +315,6 @@ document.addEventListener('keydown', (e) => {
 // INIT
 // ═══════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
-  initStarfield();
   renderLyrics();
   animateIntro();
 });
