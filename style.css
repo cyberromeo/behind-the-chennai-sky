@@ -114,10 +114,16 @@ body {
               filter 1.2s var(--ease-out-expo);
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-12px) scale(1.02); }
+}
+
 .album-art-intro.visible {
   opacity: 1;
   transform: translateY(0) scale(1);
   filter: blur(0);
+  animation: float 6s ease-in-out infinite 1.2s;
 }
 
 .album-img-intro {
@@ -178,14 +184,21 @@ body {
   margin-top: -4px;
 }
 
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
 .intro-line-3 {
   font-size: clamp(4rem, 18vw, 9rem);
   font-weight: 700;
-  background: linear-gradient(180deg, var(--fg) 40%, var(--fg-muted) 100%);
+  background: linear-gradient(to right, var(--fg) 20%, #a0a0a0 40%, var(--fg) 60%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-top: -8px;
+  animation: shimmer 6s linear infinite;
 }
 
 /* Subtitle */

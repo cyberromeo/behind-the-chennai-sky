@@ -105,12 +105,33 @@ function initStarfield() {
     }
   }
 
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
   function draw(time) {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    
+    const offsetX = (mouseX - window.innerWidth / 2) * 0.05;
+    const offsetY = (mouseY - window.innerHeight / 2) * 0.05;
+
     for (const star of stars) {
       const flicker = Math.sin(time * star.speed + star.phase) * 0.3 + 0.7;
+      
+      let x = star.x - offsetX * star.speed * 1000;
+      let y = star.y - offsetY * star.speed * 1000;
+
+      // Wrap
+      if (x < 0) x += window.innerWidth;
+      if (x > window.innerWidth) x -= window.innerWidth;
+      if (y < 0) y += window.innerHeight;
+      if (y > window.innerHeight) y -= window.innerHeight;
+
       ctx.beginPath();
-      ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+      ctx.arc(x, y, star.r, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha * flicker})`;
       ctx.fill();
     }
