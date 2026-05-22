@@ -198,6 +198,8 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-top: -8px;
+  padding-bottom: 0.2em; /* Prevents the 'y' descender from clipping */
+  line-height: 1.2;
   animation: shimmer 6s linear infinite;
 }
 
