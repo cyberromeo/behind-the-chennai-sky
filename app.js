@@ -1,0 +1,369 @@
+/* ═══════════════════════════════════════════════
+   BENEATH THE CHENNAI SKY — App Logic
+   Live Subtitle Mode — auto-distributes lyrics
+   across the song duration proportionally.
+   ═══════════════════════════════════════════════ */
+
+// ─── Lyrics with exact timestamps (from LRC sync) ───
+const LYRICS = [
+  [0,     null],  // Instrumental Intro
+  [10,    "You traveled all those miles to make my birthday bright,"],
+  [14,    "A memory I'll carry, my guiding light."],
+  [18,    "I couldn't buy a gift that could ever match your grace,"],
+  [22,    "So I drew the little photo that I see upon my space—"],
+  [26,    "Your caller ID picture, an image on my screen,"],
+  [30,    "The most comforting hello that my eyes have ever seen."],
+  [36,    "Astrology said enemies the day that we were born."],
+  [41,    "But we became the best of friends, defying all the stars,"],
+  [45,    "Talking 'bout how people love, while wondering where is ours."],
+  [49,    "We wandered through all Chennai, beneath the burning sun,"],
+  [53,    "Through every temple, every church, until the day was done."],
+  [57,    "Praying that we'd pass our tests, side by side we'd stand,"],
+  [61,    "Two searching souls who somehow found each other's hand."],
+  [66,    "Mathu, I drew every line with you inside my mind,"],
+  [70,    "It might not be perfect, but it's the truest you will find."],
+  [74,    "'Cause every stroke's a memory of laughs we used to share,"],
+  [78,    "The comfort of your energy, just knowing you were there."],
+  [82,    "People search for years and years, but never feel understood,"],
+  [86,    "Yet with you it came so naturally, the way that friendship should."],
+  [92,    "Chennai veedhigalil, nam kathaigal innum"],
+  [96,    "Kangalil kanneer, nenjil un ninaivugal ullum"],
+  [100,   "Indru pirindhaalum, endrum nee enodu"],
+  [104,   "Nee illaadha idathil, naan vaazhvadhu kadinam"],
+  [110,   "Now you're packing up your bags, to your native place you go,"],
+  [114,   "\"Forever\" is a heavy word, and it hurts more than you know."],
+  [118,   "I'll miss the little things we did, the secrets that we keep,"],
+  [122,   "A bond that grew so quietly, a bond that runs so deep."],
+  [126,   "A bond that runs so deep."],
+  [130,   "I'm sending all my luck for the exams you have to take,"],
+  [134,   "I'll be cheering for you always, for old time's sake."],
+  [138,   "No amount of distance can erase the time we've spent,"],
+  [142,   "I didn't know I needed you, until you were heaven-sent."],
+  [148,   "Thank you for walking in, so out of the blue,"],
+  [152,   "I never planned on caring quite this deeply for you."],
+  [156,   "No matter all the miles, no matter where you've been..."],
+  [160,   "I'll be waiting for your picture to light up on my screen."],
+  [165,   "I'm really gonna miss you, beneath the Chennai sky..."],
+  [170,   "With all the love I have to give."],
+  [174,   "Yours truly,"],
+  [176,   "Srihari."],
+  [180,   null],  // Song Fades Out
+];
+
+// ─── DOM Elements ───
+const introScreen      = document.getElementById('intro-screen');
+const playerScreen     = document.getElementById('player-screen');
+const startBtn         = document.getElementById('start-btn');
+const audio            = document.getElementById('audio-player');
+const playPauseBtn     = document.getElementById('play-pause-btn');
+const prevBtn          = document.getElementById('prev-btn');
+const nextBtn          = document.getElementById('next-btn');
+const progressFill     = document.getElementById('progress-fill');
+const progressThumb    = document.getElementById('progress-thumb');
+const progressWrapper  = document.getElementById('progress-wrapper');
+const currentTimeEl    = document.getElementById('current-time');
+const totalTimeEl      = document.getElementById('total-time');
+const lyricsContainer  = document.getElementById('lyrics-container');
+const lyricsViewport   = document.getElementById('lyrics-viewport');
+const iconPlay         = document.querySelector('.icon-play');
+const iconPause        = document.querySelector('.icon-pause');
+const canvas           = document.getElementById('starfield');
+
+// ─── State ───
+let currentLineIndex = -1;
+let isPlaying = false;
+let lyricElements = [];
+
+// ═══════════════════════════════════════════════
+// STARFIELD BACKGROUND
+// ═══════════════════════════════════════════════
+function initStarfield() {
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  const STAR_COUNT = 120;
+
+  function resize() {
+    canvas.width = window.innerWidth * devicePixelRatio;
+    canvas.height = window.innerHeight * devicePixelRatio;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+    initStars();
+  }
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+      stars.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r: Math.random() * 1.2 + 0.3,
+        alpha: Math.random() * 0.6 + 0.1,
+        speed: Math.random() * 0.0008 + 0.0002,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  function draw(time) {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    for (const star of stars) {
+      const flicker = Math.sin(time * star.speed + star.phase) * 0.3 + 0.7;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha * flicker})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+}
+
+// ═══════════════════════════════════════════════
+// INTRO ANIMATIONS
+// ═══════════════════════════════════════════════
+function animateIntro() {
+  const elements = document.querySelectorAll('[data-delay]');
+  elements.forEach(el => {
+    const delay = parseInt(el.dataset.delay);
+    setTimeout(() => {
+      el.classList.add('visible');
+    }, delay);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// LYRICS RENDERING
+// ═══════════════════════════════════════════════
+function renderLyrics() {
+  lyricsContainer.innerHTML = '';
+  lyricElements = [];
+
+  LYRICS.forEach((entry, i) => {
+    const div = document.createElement('div');
+    div.classList.add('lyric-line');
+    div.dataset.index = i;
+
+    if (entry[1] === null) {
+      div.textContent = '· · ·';
+      div.classList.add('instrumental');
+    } else {
+      div.textContent = entry[1];
+      if (entry[1] === "Srihari.") {
+        div.classList.add('signature');
+      }
+    }
+
+    // Click to seek
+    div.addEventListener('click', () => {
+      audio.currentTime = entry[0];
+      if (!isPlaying) {
+        togglePlay();
+      }
+    });
+
+    lyricsContainer.appendChild(div);
+    lyricElements.push(div);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// LYRICS SYNC & SCROLL
+// ═══════════════════════════════════════════════
+function syncLyrics() {
+  const time = audio.currentTime;
+  let activeIndex = -1;
+
+  for (let i = LYRICS.length - 1; i >= 0; i--) {
+    if (time >= LYRICS[i][0]) {
+      activeIndex = i;
+      break;
+    }
+  }
+
+  if (activeIndex !== currentLineIndex) {
+    currentLineIndex = activeIndex;
+    updateLyricHighlight();
+    scrollToActiveLine();
+  }
+}
+
+function updateLyricHighlight() {
+  lyricElements.forEach((el, i) => {
+    el.classList.remove('active', 'past');
+    if (i === currentLineIndex) {
+      el.classList.add('active');
+    } else if (i < currentLineIndex) {
+      el.classList.add('past');
+    }
+  });
+}
+
+function scrollToActiveLine() {
+  if (currentLineIndex < 0 || !lyricElements[currentLineIndex]) return;
+
+  const activeLine = lyricElements[currentLineIndex];
+  const viewportHeight = lyricsViewport.clientHeight;
+  const lineOffset = activeLine.offsetTop;
+  const lineHeight = activeLine.offsetHeight;
+
+  // Position the active line at ~30% from top of viewport
+  const targetY = lineOffset - (viewportHeight * 0.3) + (lineHeight / 2);
+
+  lyricsContainer.style.transform = `translateY(${-targetY}px)`;
+}
+
+// ═══════════════════════════════════════════════
+// PLAYBACK CONTROLS
+// ═══════════════════════════════════════════════
+function togglePlay() {
+  if (audio.paused) {
+    audio.play();
+    isPlaying = true;
+    iconPlay.style.display = 'none';
+    iconPause.style.display = 'block';
+    document.querySelector('.player-wrapper').classList.remove('paused');
+  } else {
+    audio.pause();
+    isPlaying = false;
+    iconPlay.style.display = 'block';
+    iconPause.style.display = 'none';
+    document.querySelector('.player-wrapper').classList.add('paused');
+  }
+}
+
+function updateProgress() {
+  if (!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  progressFill.style.width = pct + '%';
+  progressThumb.style.left = pct + '%';
+  currentTimeEl.textContent = formatTime(audio.currentTime);
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+// ═══════════════════════════════════════════════
+// PROGRESS BAR SEEKING
+// ═══════════════════════════════════════════════
+function seekFromEvent(e) {
+  const rect = progressWrapper.querySelector('.progress-bar').getBoundingClientRect();
+  const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+  const pct = Math.max(0, Math.min(1, x / rect.width));
+  audio.currentTime = pct * audio.duration;
+}
+
+let isSeeking = false;
+
+progressWrapper.addEventListener('mousedown', (e) => {
+  isSeeking = true;
+  seekFromEvent(e);
+});
+
+progressWrapper.addEventListener('touchstart', (e) => {
+  isSeeking = true;
+  seekFromEvent(e);
+}, { passive: true });
+
+window.addEventListener('mousemove', (e) => {
+  if (isSeeking) seekFromEvent(e);
+});
+
+window.addEventListener('touchmove', (e) => {
+  if (isSeeking) seekFromEvent(e);
+}, { passive: true });
+
+window.addEventListener('mouseup', () => { isSeeking = false; });
+window.addEventListener('touchend', () => { isSeeking = false; });
+
+// ═══════════════════════════════════════════════
+// SKIP CONTROLS
+// ═══════════════════════════════════════════════
+prevBtn.addEventListener('click', () => {
+  audio.currentTime = Math.max(0, audio.currentTime - 10);
+});
+
+nextBtn.addEventListener('click', () => {
+  audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 10);
+});
+
+// ═══════════════════════════════════════════════
+// START BUTTON — TRANSITION TO PLAYER
+// ═══════════════════════════════════════════════
+startBtn.addEventListener('click', () => {
+  // Exit intro
+  introScreen.classList.add('exiting');
+  introScreen.classList.remove('active');
+
+  // Enter player
+  setTimeout(() => {
+    playerScreen.classList.add('active', 'entering');
+    // Start playback
+    audio.play().then(() => {
+      isPlaying = true;
+      iconPlay.style.display = 'none';
+      iconPause.style.display = 'block';
+    }).catch(() => {
+      // autoplay blocked — user will need to hit play
+    });
+  }, 400);
+});
+
+// ═══════════════════════════════════════════════
+// PLAY/PAUSE BUTTON
+// ═══════════════════════════════════════════════
+playPauseBtn.addEventListener('click', togglePlay);
+
+// ═══════════════════════════════════════════════
+// AUDIO EVENTS
+// ═══════════════════════════════════════════════
+audio.addEventListener('timeupdate', () => {
+  syncLyrics();
+  updateProgress();
+});
+
+audio.addEventListener('loadedmetadata', () => {
+  totalTimeEl.textContent = formatTime(audio.duration);
+});
+
+audio.addEventListener('ended', () => {
+  isPlaying = false;
+  iconPlay.style.display = 'block';
+  iconPause.style.display = 'none';
+  document.querySelector('.player-wrapper').classList.add('paused');
+});
+
+// ═══════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (playerScreen.classList.contains('active')) {
+      togglePlay();
+    } else {
+      startBtn.click();
+    }
+  }
+  if (e.code === 'ArrowLeft') {
+    audio.currentTime = Math.max(0, audio.currentTime - 5);
+  }
+  if (e.code === 'ArrowRight') {
+    audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5);
+  }
+});
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  initStarfield();
+  renderLyrics();
+  animateIntro();
+});

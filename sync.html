@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lyrics Sync Tool — Beneath the Chennai Sky</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.1em;
+    }
+
+    .status-bar {
+      display: flex;
+      gap: 20px;
+      padding: 10px 20px;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+    .status-bar span { letter-spacing: 0.05em; }
+    #status-time { color: rgba(255,255,255,0.8); }
+
+    .lyrics-area {
+      flex: 1;
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+      gap: 24px;
+      overflow: hidden;
+    }
+
+    .prev-line {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.2);
+      font-style: italic;
+      min-height: 1.4em;
+    }
+
+    .current-line {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #fff;
+      min-height: 2.8em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .next-line {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.25);
+      min-height: 1.4em;
+    }
+
+    .progress-info {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.1em;
+    }
+
+    .controls {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .tap-btn {
+      width: 100%;
+      padding: 18px 32px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tap-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.4); }
+    .tap-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.18); }
+    .tap-btn.start-btn-sync { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
+    .tap-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .hint {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      padding-bottom: 16px;
+    }
+
+    /* Result overlay */
+    .result-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0a0a0a;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .result-overlay.visible { display: flex; }
+    .result-overlay h2 {
+      font-family: 'Playfair Display', serif;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .result-overlay .sub {
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 16px;
+    }
+    .result-code {
+      flex: 1;
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 16px;
+      overflow: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.8);
+      white-space: pre;
+      -webkit-user-select: all;
+      user-select: all;
+    }
+    .copy-btn {
+      margin-top: 12px;
+      padding: 14px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 60px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+    .copy-btn:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Lyrics Sync Tool</h1>
+    <p>TAP WHEN EACH LINE IS SUNG</p>
+  </div>
+
+  <div class="status-bar">
+    <span id="status-time">0:00</span>
+    <span id="status-line">Line 0 / 0</span>
+  </div>
+
+  <div class="lyrics-area">
+    <div class="prev-line" id="prev-line"></div>
+    <div class="current-line" id="current-line">Press START to begin</div>
+    <div class="next-line" id="next-line"></div>
+    <div class="progress-info" id="progress-info"></div>
+  </div>
+
+  <div class="controls">
+    <button class="tap-btn start-btn-sync" id="start-sync-btn">▶ START SONG</button>
+    <button class="tap-btn" id="tap-btn" disabled>TAP — THIS LINE IS PLAYING NOW (SPACE)</button>
+    <button class="tap-btn" id="skip-btn" disabled style="font-size:0.75rem; padding:12px;">SKIP LINE (INSTRUMENTAL / NOT IN SONG)</button>
+  </div>
+  <div class="hint">Spacebar = Tap &nbsp;•&nbsp; S = Skip &nbsp;•&nbsp; Listen carefully, tap when you hear each line start</div>
+
+  <div class="result-overlay" id="result-overlay">
+    <h2>✓ Sync Complete</h2>
+    <p class="sub">Copy the code below and replace the LYRICS array in app.js</p>
+    <div class="result-code" id="result-code"></div>
+    <button class="copy-btn" id="copy-btn">COPY TO CLIPBOARD</button>
+  </div>
+
+  <audio id="audio" preload="auto">
+    <source src="track.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const LINES = [
+      "You traveled all those miles to make my birthday bright,",
+      "A memory I'll carry, my guiding light.",
+      "I couldn't buy a gift that could ever match your grace,",
+      "So I drew the little photo that I see upon my space—",
+      "Your caller ID picture, an image on my screen,",
+      "The most comforting hello that my eyes have ever seen.",
+      null, // instrumental break
+      "A fiery Leo and an Earthy Capricorn,",
+      "Astrology said enemies the day that we were born.",
+      "But we became the best of friends, defying all the stars,",
+      "Talking 'bout how people love, while wondering where is ours.",
+      "We wandered through all Chennai, beneath the burning sun,",
+      "Through every temple, every church, until the day was done.",
+      "Praying that we'd pass our tests, side by side we'd stand,",
+      "Two searching souls who somehow found each other's hand.",
+      null, // instrumental break
+      "Mathu, I drew every line with you inside my mind,",
+      "It might not be perfect, but it's the truest you will find.",
+      "'Cause every stroke's a memory of laughs we used to share,",
+      "The comfort of your energy, just knowing you were there.",
+      "People search for years and years, but never feel understood,",
+      "Yet with you it came so naturally, the way that friendship should.",
+      null, // instrumental break
+      "Chennai veedhigalil, nam kathaigal innum",
+      "Kangalil kanneer, nenjil un ninaivugal ullum",
+      "Indru pirindhaalum, endrum nee enodu",
+      "Nee illaadha idathil, naan vaazhvadhu kadinam",
+      null, // instrumental break
+      "Now you're packing up your bags, to your native place you go,",
+      "\"Forever\" is a heavy word, and it hurts more than you know.",
+      "I'll miss the little things we did, the secrets that we keep,",
+      "A bond that grew so quietly, a bond that runs so deep.",
+      "I'm sending all my luck for the exams you have to take,",
+      "I'll be cheering for you always, for old time's sake.",
+      "No amount of distance can erase the time we've spent,",
+      "I didn't know I needed you, until you were heaven-sent.",
+      null, // instrumental break
+      "Thank you for walking in, so out of the blue,",
+      "I never planned on caring quite this deeply for you.",
+      "No matter all the miles, no matter where you've been...",
+      "I'll be waiting for your picture to light up on my screen.",
+      "I'm really gonna miss you, beneath the Chennai sky...",
+      "With all the love I have to give.",
+      null, // pause
+      "Yours truly, Srihari.",
+    ];
+
+    const audio = document.getElementById('audio');
+    const startBtn = document.getElementById('start-sync-btn');
+    const tapBtn = document.getElementById('tap-btn');
+    const skipBtn = document.getElementById('skip-btn');
+    const prevLineEl = document.getElementById('prev-line');
+    const currentLineEl = document.getElementById('current-line');
+    const nextLineEl = document.getElementById('next-line');
+    const statusTime = document.getElementById('status-time');
+    const statusLine = document.getElementById('status-line');
+    const progressInfo = document.getElementById('progress-info');
+
+    let currentIndex = 0;
+    let timestamps = [];
+    let started = false;
+
+    function displayLine(text) {
+      return text === null ? '· · · (instrumental)' : text;
+    }
+
+    function updateDisplay() {
+      prevLineEl.textContent = currentIndex > 0 ? displayLine(LINES[currentIndex - 1]) : '';
+      currentLineEl.textContent = currentIndex < LINES.length ? displayLine(LINES[currentIndex]) : 'DONE!';
+      nextLineEl.textContent = currentIndex + 1 < LINES.length ? 'Next: ' + displayLine(LINES[currentIndex + 1]) : '';
+      statusLine.textContent = `Line ${currentIndex + 1} / ${LINES.length}`;
+      progressInfo.textContent = `${Math.round((currentIndex / LINES.length) * 100)}% complete`;
+    }
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return m + ':' + String(sec).padStart(2, '0');
+    }
+
+    setInterval(() => {
+      if (started) statusTime.textContent = formatTime(audio.currentTime);
+    }, 100);
+
+    startBtn.addEventListener('click', () => {
+      audio.currentTime = 0;
+      audio.play();
+      started = true;
+      startBtn.disabled = true;
+      startBtn.textContent = '♪ PLAYING...';
+      tapBtn.disabled = false;
+      skipBtn.disabled = false;
+      timestamps.push(0); // first entry starts at 0 (instrumental intro)
+      currentIndex = 1;   // move to first lyric line
+      updateDisplay();
+    });
+
+    function recordTap() {
+      if (!started || currentIndex >= LINES.length) return;
+      const t = Math.round(audio.currentTime * 10) / 10;
+      timestamps.push(t);
+      currentIndex++;
+      updateDisplay();
+      if (currentIndex >= LINES.length) finishSync();
+    }
+
+    function skipLine() {
+      if (!started || currentIndex >= LINES.length) return;
+      // Use previous timestamp + 0.1 as a placeholder
+      const lastT = timestamps.length > 0 ? timestamps[timestamps.length - 1] : 0;
+      timestamps.push(lastT + 0.5);
+      currentIndex++;
+      updateDisplay();
+      if (currentIndex >= LINES.length) finishSync();
+    }
+
+    tapBtn.addEventListener('click', recordTap);
+    skipBtn.addEventListener('click', skipLine);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') { e.preventDefault(); recordTap(); }
+      if (e.code === 'KeyS') { e.preventDefault(); skipLine(); }
+    });
+
+    function finishSync() {
+      audio.pause();
+      tapBtn.disabled = true;
+      skipBtn.disabled = true;
+
+      // Build the output
+      let code = 'const LYRICS = [\n';
+      // Add instrumental intro at 0
+      code += '  [0,    null],  // instrumental intro\n\n';
+
+      for (let i = 1; i < LINES.length; i++) {
+        const t = timestamps[i];
+        const tStr = String(t).padEnd(5, ' ');
+        if (LINES[i] === null) {
+          code += `  [${tStr}, null],  // instrumental break\n\n`;
+        } else {
+          const escaped = LINES[i].replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+          code += `  [${tStr}, "${escaped}"],\n`;
+        }
+      }
+      code += '];\n';
+
+      document.getElementById('result-code').textContent = code;
+      document.getElementById('result-overlay').classList.add('visible');
+    }
+
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      navigator.clipboard.writeText(document.getElementById('result-code').textContent).then(() => {
+        document.getElementById('copy-btn').textContent = '✓ COPIED!';
+        setTimeout(() => document.getElementById('copy-btn').textContent = 'COPY TO CLIPBOARD', 2000);
+      });
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>
