@@ -3,10 +3,10 @@ const sharp = require('sharp');
 async function main() {
   try {
     await sharp('album-art.jpg')
-      .resize(1200, 630)
+      .resize(800, 800) // Square aspect ratio
       .jpeg({ quality: 80 })
       .toFile('og-image.jpg');
-    console.log('Created og-image.jpg successfully!');
+    console.log('Created square og-image.jpg successfully!');
   } catch (err) {
     console.error('Error resizing image:', err);
   }
