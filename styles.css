@@ -209,17 +209,17 @@ img{display:block;max-width:100%}
 .lyric-line.near{filter:blur(.4px)}
 .lyric-line.past{color:rgba(246,241,231,.26)}
 .lyric-line.active{transform:scale(1);filter:none;color:var(--paper)}
-.lyric-line .fill{-webkit-box-decoration-break:slice;box-decoration-break:slice}
-.lyric-line.active .fill{
-  background:linear-gradient(90deg,var(--paper) 0 var(--p,0%), rgba(246,241,231,.38) var(--p,0%) 100%);
-  -webkit-background-clip:text;background-clip:text;
-  color:transparent;text-shadow:none;
-}
+/* karaoke fill: each word lights up in turn (plain text colour, no background-clip:text,
+   which iOS Safari paints as stray stripes on wrapped lines) */
+.lyric-line .w{transition:color .3s ease}
+.lyric-line.active .w{color:rgba(246,241,231,.38)}
+.lyric-line.active .w.on{color:var(--paper)}
 .lyric-line.active{text-shadow:0 0 28px rgba(255,200,140,.18)}
 .lyric-line.tamil{font-family:var(--serif);font-style:italic;font-weight:400;font-size:31px;letter-spacing:0}
 .lyric-line.closing{font-family:var(--serif);font-style:italic;font-weight:400;font-size:30px;letter-spacing:0}
 .lyric-line.signature{font-family:var(--script);font-weight:400;font-size:52px;line-height:1.1;letter-spacing:0;padding-top:4px}
-.lyric-line.signature.active .fill{background:linear-gradient(90deg,var(--accent,var(--amber)) 0 var(--p,0%), rgba(255,180,94,.35) var(--p,0%) 100%);-webkit-background-clip:text;background-clip:text}
+.lyric-line.signature.active .w{color:rgba(255,180,94,.35)}
+.lyric-line.signature.active .w.on{color:var(--amber)}
 .lyric-line.instrumental{display:flex;gap:9px;padding:18px 0;font-size:0}
 .lyric-line.instrumental .dot{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:.6}
 .lyric-line.instrumental.active .dot{animation:dot 1.6s ease-in-out infinite;background:var(--paper)}
@@ -407,7 +407,7 @@ img{display:block;max-width:100%}
 /* Section labels inside lyrics */
 .lyric-section{
   margin:26px 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;
-  color:color-mix(in srgb,var(--accent,#ffb45e) 75%,transparent);
+  color:rgba(246,226,200,.42);
 }
 .lyric-section:first-child{margin-top:0}
 
@@ -415,7 +415,7 @@ img{display:block;max-width:100%}
 .fx{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;--dur:4s}
 .fx > *{position:absolute;opacity:0}
 .fx-glow{inset:auto -20% -30% -20%;height:80%;background:radial-gradient(50% 60% at 50% 100%,rgba(190,220,255,.55),rgba(255,214,160,.18) 45%,transparent 75%)}
-.fx-bloom{left:50%;top:38%;width:140vmin;height:140vmin;margin:-70vmin 0 0 -70vmin;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent,#ffb45e) 45%,transparent),transparent 62%)}
+.fx-bloom{left:50%;top:38%;width:140vmin;height:140vmin;margin:-70vmin 0 0 -70vmin;border-radius:50%;background:radial-gradient(circle,rgba(255,196,130,.30),transparent 62%)}
 .fx-sky{inset:0;background:linear-gradient(180deg,rgba(150,175,255,.32),rgba(255,190,130,.12) 45%,transparent 75%)}
 .fx-sun{left:50%;top:-30%;width:120vmin;height:120vmin;margin-left:-60vmin;border-radius:50%;background:radial-gradient(circle,rgba(255,170,80,.55),rgba(255,120,40,.18) 40%,transparent 68%)}
 .fx-rays{inset:-10% 0 30% 0;background:repeating-conic-gradient(from 180deg at 50% -10%,rgba(255,236,200,.16) 0deg 4deg,transparent 4deg 13deg);-webkit-mask-image:linear-gradient(180deg,#000,transparent 85%);mask-image:linear-gradient(180deg,#000,transparent 85%)}

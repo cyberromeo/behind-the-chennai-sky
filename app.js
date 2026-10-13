@@ -673,7 +673,20 @@ function renderLyrics() {
     } else {
       const span = document.createElement('span');
       span.className = 'fill';
-      span.textContent = text;
+      // one span per word; each word lights up once the sweep reaches its start
+      const words = [];
+      let pos = 0;
+      text.split(/(\s+)/).forEach(tok => {
+        if (!tok) return;
+        if (/^\s+$/.test(tok)) { span.appendChild(document.createTextNode(tok)); pos += tok.length; return; }
+        const w = document.createElement('span');
+        w.className = 'w';
+        w.textContent = tok;
+        span.appendChild(w);
+        words.push([w, (pos / text.length) * 100]);
+        pos += tok.length;
+      });
+      div._words = words;
       div.appendChild(span);
       if (text === 'Srihari.' || text === '— Srihari') div.classList.add('signature');
       else if (text === 'Yours truly,') div.classList.add('closing');
@@ -760,7 +773,10 @@ function syncLyrics() {
     const start = LINES[idx][0];
     const dur = Math.max(0.6, lineDuration(idx) * 0.9);
     const p = reduceMotion.matches ? 100 : Math.min(100, ((t - start) / dur) * 100);
-    el.firstChild.style.setProperty('--p', p.toFixed(1) + '%');
+    if (el._words) for (const [w, at] of el._words) {
+      const on = p > at;
+      if (w._on !== on) { w._on = on; w.classList.toggle('on', on); }
+    }
   }
   // resume auto-follow after the listener stops scrolling
   if (!following && performance.now() - lastUserScroll > 4500) {
