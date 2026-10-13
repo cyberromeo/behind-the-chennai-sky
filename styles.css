@@ -197,18 +197,17 @@ img{display:block;max-width:100%}
 .lyrics-container{padding:34vh 26px 48vh}
 .lyric-line{
   font-size:27px;line-height:1.24;font-weight:650;letter-spacing:-.018em;
-  color:rgba(246,241,231,.30);
+  color:rgba(246,241,231,.26);
   padding:10px 0;margin:2px 0;
   cursor:pointer;
   transform-origin:left center;
   transform:scale(.96);
-  transition:color .5s, transform .6s var(--ease-out), filter .6s, opacity .6s;
-  filter:blur(1.2px);
+  transition:color .5s, transform .6s var(--ease-out), opacity .6s;
   text-wrap:pretty;
 }
-.lyric-line.near{filter:blur(.4px)}
+.lyric-line.near{color:rgba(246,241,231,.36)}
 .lyric-line.past{color:rgba(246,241,231,.26)}
-.lyric-line.active{transform:scale(1);filter:none;color:var(--paper)}
+.lyric-line.active{transform:scale(1);color:var(--paper)}
 /* karaoke fill: each word lights up in turn (plain text colour, no background-clip:text,
    which iOS Safari paints as stray stripes on wrapped lines) */
 .lyric-line .w{transition:color .3s ease}
@@ -473,7 +472,7 @@ img{display:block;max-width:100%}
 }
 
 /* dim everything to one star during the spoken line */
-.dock,.lyric-line{transition:opacity .9s ease, color .5s, transform .6s var(--ease-out), filter .6s}
+.dock,.lyric-line{transition:opacity .9s ease, color .5s, transform .6s var(--ease-out)}
 .app[data-fx="dim"] .dock{opacity:.3}
 .app[data-fx="dim"] .lyric-line:not(.active){opacity:.12}
 .app[data-fx="dim"] .topbar{opacity:.3}
